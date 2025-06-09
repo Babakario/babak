@@ -1,9 +1,11 @@
 Flask
+Flask-SQLAlchemy
+SQLAlchemy
 
 # For AI Content Generation (choose one or more):
 # openai
 # transformers
-# requests # (if calling external APIs directly)
+requests # (if calling external APIs directly)
 
 # For Data Analysis (optional, if doing complex analysis):
 # pandas
