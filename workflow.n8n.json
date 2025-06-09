@@ -1,0 +1,201 @@
+{
+  "name": "Google Trends to Instagram Video Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": "0 9 * * *"
+      },
+      "name": "Daily Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "id": "cron-trigger-1"
+    },
+    {
+      "parameters": {
+        "functionCode": "from pytrends.request import TrendReq\n\npytrends = TrendReq(hl='en-US', tz=360)\n\ntrending_searches_df = pytrends.trending_searches(pn='united_states')\n\nitems = [{'title': trend} for trend in trending_searches_df[0].tolist()]\n\nreturn items"
+      },
+      "name": "Fetch Google Trends",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "message": "Here are the current Google Trends:\n{{$json.items.map(item => item.title).join('\\n')}}\n\nPlease specify how many videos you'd like to create for these trends.",
+        "fields": {
+          "fields": [
+            {
+              "name": "videoCount",
+              "type": "number",
+              "displayName": "Number of videos to create",
+              "required": true,
+              "typeOptions": {}
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Prompt for Video Count",
+      "type": "n8n-nodes-base.prompt",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.invideo.io/v1/search_templates",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "X-API-KEY",
+          "value": "YOUR_INVIDEO_API_KEY"
+        },
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": "{\n  \"keywords\": \"{{ $json.items[0].title }}\",\n  \"count\": {{ $json.videoCount }}\n}",
+        "options": {}
+      },
+      "name": "Fetch InVideo Assets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3.1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.invideo.io/v1/generate_video",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "X-API-KEY",
+          "value": "YOUR_INVIDEO_API_KEY"
+        },
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": "{\n  \"template_id\": \"{{ $json.template_id }}\",\n  \"title\": \"{{ $node[\"Fetch Google Trends\"].json.items[0].title }}\",\n  \"customizations\": {\n    \"resolution\": \"1080p\"\n  }\n}",
+        "options": {}
+      },
+      "name": "Generate InVideo Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3.1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v18.0/YOUR_INSTAGRAM_USER_ID/media",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer YOUR_INSTAGRAM_ACCESS_TOKEN"
+        },
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": "{\n  \"media_type\": \"VIDEO\",\n  \"video_url\": \"{{ $json.video_url }}\",\n  \"caption\": \"Check out this video about: {{ $node[\"Fetch Google Trends\"].json.items[0].title }} #trending #google #invideo\"\n}",
+        "options": {}
+      },
+      "name": "Post Video to Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3.1,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "/data/workflow_log.txt",
+        "data": "{{JSON.stringify($json, null, 2)}}",
+        "append": true,
+        "createDir": true
+      },
+      "name": "Log Workflow Output",
+      "type": "n8n-nodes-base.writeFile",
+      "typeVersion": "1.1",
+      "position": [
+        1450,
+        300
+      ],
+      "id": "log-output-1"
+    }
+  ],
+  "connections": {
+    "Daily Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Google Trends",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch Google Trends": {
+      "main": [
+        [
+          {
+            "node": "Prompt for Video Count",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Prompt for Video Count": {
+      "main": [
+        [
+          {
+            "node": "Fetch InVideo Assets",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch InVideo Assets": {
+      "main": [
+        [
+          {
+            "node": "Generate InVideo Video",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Generate InVideo Video": {
+      "main": [
+        [
+          {
+            "node": "Post Video to Instagram",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Post Video to Instagram": {
+      "main": [
+        [
+          {
+            "node": "Log Workflow Output",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "1"
+}
