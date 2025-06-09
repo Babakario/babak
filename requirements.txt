@@ -1,0 +1,14 @@
+Flask
+
+# For AI Content Generation (choose one or more):
+# openai
+# transformers
+# requests # (if calling external APIs directly)
+
+# For Data Analysis (optional, if doing complex analysis):
+# pandas
+# numpy
+# scikit-learn # (for more advanced ML-based insights)
+
+# For Testing:
+pytest
