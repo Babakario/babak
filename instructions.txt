@@ -1,0 +1,55 @@
+---
+**How to Use the Linux Gateway Switcher Scripts**
+
+These scripts allow you to quickly switch your default internet gateway between two different modems (e.g., ADSL and Irancell).
+
+**Prerequisites:**
+
+1.  **Identify Your Network Interface Name:**
+    You need to know the name of the network interface you are using (e.g., `eth0`, `wlan0`, `enp3s0`). You can find this by running one of the following commands in your terminal:
+    *   `ip addr` (Look for the interface with your IP address)
+    *   `nmcli dev status` (Shows a list of network devices and their states)
+    *   `ls /sys/class/net` (Lists all network interfaces)
+    The Windows batch scripts used 'Ethernet'. The equivalent in Linux is often `eth0` for wired connections or `wlan0` for wireless, but it can vary.
+
+2.  **Scripts Require Sudo Privileges:**
+    Modifying network routes requires administrator (root) privileges. Therefore, you will need to run these scripts using `sudo`.
+
+**Setup:**
+
+1.  **Save the Scripts:**
+    Save the `use_adsl.sh` and `use_irancell.sh` files to a directory on your Linux system (e.g., in your home directory or a dedicated `scripts` folder).
+
+2.  **Make Scripts Executable:**
+    Open your terminal, navigate to the directory where you saved the scripts, and run the following commands:
+    ```bash
+    chmod +x use_adsl.sh
+    chmod +x use_irancell.sh
+    ```
+
+**How to Run:**
+
+1.  **Switch to ADSL Modem (192.168.1.1):**
+    Open your terminal and run:
+    ```bash
+    sudo ./use_adsl.sh YOUR_INTERFACE_NAME
+    ```
+    Replace `YOUR_INTERFACE_NAME` with the actual interface name you identified earlier.
+    *Example:* If your interface is `eth0`, you would run: `sudo ./use_adsl.sh eth0`
+
+2.  **Switch to Irancell Modem (192.168.1.2):**
+    Open your terminal and run:
+    ```bash
+    sudo ./use_irancell.sh YOUR_INTERFACE_NAME
+    ```
+    Replace `YOUR_INTERFACE_NAME` with your actual interface name.
+    *Example:* If your interface is `wlp2s0`, you would run: `sudo ./use_irancell.sh wlp2s0`
+
+**Important Notes:**
+
+*   **Error "RTNETLINK answers: Operation not permitted":** If you see this error, it means you forgot to run the script with `sudo`.
+*   **Error "Cannot find device "YOUR_INTERFACE_NAME"":** This means the interface name you provided is incorrect or the interface is not active. Double-check the interface name.
+*   **IP Addresses:** The scripts are configured for gateway IPs `192.168.1.1` (ADSL) and `192.168.1.2` (Irancell). If your modem IPs are different, you will need to edit the `GATEWAY_ADSL` and `GATEWAY_IRANCELL` variables within the scripts themselves.
+*   **DNS:** These scripts only change the default gateway. They do not change your DNS servers. If you need to switch DNS servers as well, you would need to add commands to modify `/etc/resolv.conf` or use a network management tool that handles DNS configuration. For most common setups where both modems are on the same local network and provide DNS, this might not be an issue.
+
+---
