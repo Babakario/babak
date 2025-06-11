@@ -1,0 +1,12 @@
+name = "nobitex-price-bot"
+main = "index.js"
+compatibility_date = "2023-10-30" # Or the latest date
+
+[vars]
+# You will set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in the Cloudflare dashboard
+# Example:
+# TELEGRAM_BOT_TOKEN = "your_actual_bot_token"
+# TELEGRAM_CHAT_ID = "your_actual_chat_id"
+
+[[triggers]]
+crons = ["*/5 * * * *"] # Example: Run every 5 minutes
