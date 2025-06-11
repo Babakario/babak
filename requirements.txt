@@ -12,3 +12,4 @@ Flask
 
 # For Testing:
 pytest
+python-telegram-bot
