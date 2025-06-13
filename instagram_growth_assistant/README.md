@@ -85,23 +85,32 @@ instagram_growth_assistant/
 3.  **Fetching, Saving, and Analyzing Hashtags:**
     To also analyze and display the most common hashtags found in the captions of the collected media:
     ```bash
-    python src/main.py pythonprogramming --limit 20 --output-csv --analyze-hashtags
+    python src/main.py pythonprogramming --limit 20 --output-csv --analyze-hashtags --hashtag-top-n 15
     ```
     *   `--analyze-hashtags`: Performs hashtag frequency analysis on the data from the generated CSV.
+    *   `--hashtag-top-n 15`: Displays the top 15 hashtags from the analysis (default is 10).
 
 4.  **Fetching, Saving, and Suggesting Users:**
     To also get suggestions for users who are active around the target hashtag:
     ```bash
-    python src/main.py naturephotography --limit 50 --output-csv --suggest-users
+    python src/main.py naturephotography --limit 50 --output-csv --suggest-users --suggest-min-posts 3 --suggest-top-n 7
     ```
-    *   `--suggest-users`: Analyzes the generated CSV to suggest users who have posted frequently (default: at least 2 posts). Shows top 5 suggestions by default when called from `main.py`.
+    *   `--suggest-users`: Analyzes the generated CSV to suggest users.
+    *   `--suggest-min-posts 3`: Suggests users who have made at least 3 posts (default is 2).
+    *   `--suggest-top-n 7`: Shows the top 7 suggested users (default is 10).
 
-5.  **All Features Together:**
+5.  **All Features Together (with custom analysis parameters):**
     ```bash
-    python src/main.py artificialintelligence --limit 30 --output-csv --analyze-hashtags --suggest-users
+    python src/main.py artificialintelligence --limit 30 --output-csv --analyze-hashtags --hashtag-top-n 12 --suggest-users --suggest-min-posts 2 --suggest-top-n 8
     ```
 
-6.  **Standalone Analysis Scripts:**
+6.  **Analysis Parameter Arguments (Optional):**
+    When using `--analyze-hashtags` or `--suggest-users` with `src/main.py`, you can also use:
+    *   `--hashtag-top-n <number>`: Sets the number of top hashtags to show (default: 10).
+    *   `--suggest-min-posts <number>`: Sets the minimum number of posts a user must have to be suggested (default: 2).
+    *   `--suggest-top-n <number>`: Sets the number of top users to suggest (default: 10).
+
+7.  **Standalone Analysis Scripts:**
     The analysis scripts can also be run independently if you already have a CSV data file:
     *   **Hashtag Analysis:**
         ```bash

@@ -76,8 +76,12 @@ def main():
     parser.add_argument("hashtag", type=str, help="The hashtag to search for (without the #).")
     parser.add_argument("--limit", type=int, default=10, help="Number of recent media items to fetch.")
     parser.add_argument("--output-csv", action='store_true', help="Save the output to a CSV file in the 'data' directory.")
+    # Analysis specific arguments
     parser.add_argument("--analyze-hashtags", action='store_true', help="Analyze hashtags from the output CSV (requires --output-csv).")
-    parser.add_argument("--suggest-users", action='store_true', help="Suggest users based on activity in the output CSV (requires --output-csv).") # New argument
+    parser.add_argument("--hashtag-top-n", type=int, default=10, help="Number of top hashtags to display from analysis (default: 10).")
+    parser.add_argument("--suggest-users", action='store_true', help="Suggest users based on activity in the output CSV (requires --output-csv).")
+    parser.add_argument("--suggest-min-posts", type=int, default=2, help="Minimum posts for a user to be suggested (default: 2).")
+    parser.add_argument("--suggest-top-n", type=int, default=10, help="Number of users to suggest (default: 10).")
 
     args = parser.parse_args()
 
@@ -116,42 +120,36 @@ Successfully found {len(media_items)} media items for #{args.hashtag}:")
             data_directory = os.path.join(project_root, 'data')
             saved_csv_filepath = save_media_to_csv(media_items, args.hashtag, data_directory) # MODIFIED: Store returned path
 
-            if saved_csv_filepath and args.analyze_hashtags: # MODIFIED: Perform analysis
+            if saved_csv_filepath and args.analyze_hashtags:
                 print("
 --- Hashtag Analysis Results ---")
-                # Default top_n for analysis, can be made configurable later if needed
-                analysis_counts = analyze_hashtag_csv(saved_csv_filepath, top_n=10)
+                analysis_counts = analyze_hashtag_csv(saved_csv_filepath, top_n=args.hashtag_top_n)
                 if analysis_counts is not None:
                     if not analysis_counts:
                         print("No hashtags were found in the CSV to analyze.")
                     else:
-                        # The analyze_hashtag_csv now returns Counter, let main.py print it
-                        # This avoids analyze_hashtag_csv printing when used as a library
-                        top_n_display = 10 # Or make this configurable in main.py's args
-                        print(f"Top {min(top_n_display, len(analysis_counts))} most common hashtags found in '{os.path.basename(saved_csv_filepath)}':")
-                        for tag, count in analysis_counts.most_common(top_n_display):
+                        print(f"Top {min(args.hashtag_top_n, len(analysis_counts))} most common hashtags found in '{os.path.basename(saved_csv_filepath)}':")
+                        for tag, count in analysis_counts.most_common(args.hashtag_top_n):
                             print(f"  #{tag}: {count}")
                 else:
                     print("Hashtag analysis could not be completed based on the CSV.")
-            elif args.analyze_hashtags and not saved_csv_filepath : # Corrected from "and not saved_csv_filepath" to "and not saved_csv_filepath"
+            elif args.analyze_hashtags and not saved_csv_filepath :
                  logger.warning("CSV saving failed or was not requested. Skipping hashtag analysis.")
 
-            # MODIFIED: Perform user suggestions if requested
             if args.suggest_users and saved_csv_filepath:
                 print("
 --- User Suggestions ---")
-                # Using default min_posts=2, top_n=5 for integrated version
-                user_suggestions = suggest_users_from_csv(saved_csv_filepath, min_posts=2, top_n=5)
+                user_suggestions = suggest_users_from_csv(saved_csv_filepath, min_posts=args.suggest_min_posts, top_n=args.suggest_top_n)
                 if user_suggestions is not None:
                     if not user_suggestions:
-                        print(f"No users met the criteria (at least 2 posts) for suggestion from '{os.path.basename(saved_csv_filepath)}'.")
+                        print(f"No users met the criteria (at least {args.suggest_min_posts} posts) for suggestion from '{os.path.basename(saved_csv_filepath)}'.")
                     else:
-                        print(f"Top {len(user_suggestions)} suggested users (min 2 posts) from '{os.path.basename(saved_csv_filepath)}':")
+                        print(f"Top {len(user_suggestions)} suggested users (min {args.suggest_min_posts} posts) from '{os.path.basename(saved_csv_filepath)}':")
                         for user, count in user_suggestions:
                             print(f"  @{user} (found in {count} posts)")
                 else:
                     print("User suggestion analysis could not be completed based on the CSV.")
-            elif args.suggest_users and not saved_csv_filepath: # This case implies --output-csv was false or saving failed
+            elif args.suggest_users and not saved_csv_filepath:
                 logger.warning("CSV saving may have failed or was not requested. Skipping user suggestions.")
     else:
         print(f"
