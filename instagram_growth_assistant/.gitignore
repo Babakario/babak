@@ -14,3 +14,7 @@ venv.bak/
 
 # Config files containing secrets
 config/config.ini
+
+# Token cache files
+.instagram_token_cache.json
+*.test_cache.json
