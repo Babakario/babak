@@ -10,7 +10,8 @@ sys.path.insert(0, project_root)
 
 from src.api import instagram_client
 from src.analysis.hashtag_analyzer import analyze_hashtag_csv
-from src.analysis.user_suggester import suggest_users_from_csv # New import
+from src.analysis.user_suggester import suggest_users_from_csv
+from src.analysis.caption_analyzer import extract_common_ngrams # New import
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -82,6 +83,9 @@ def main():
     parser.add_argument("--suggest-users", action='store_true', help="Suggest users based on activity in the output CSV (requires --output-csv).")
     parser.add_argument("--suggest-min-posts", type=int, default=2, help="Minimum posts for a user to be suggested (default: 2).")
     parser.add_argument("--suggest-top-n", type=int, default=10, help="Number of users to suggest (default: 10).")
+    parser.add_argument("--suggest-themes", action='store_true', help="Suggest content themes based on n-gram analysis of captions (requires --output-csv).")
+    parser.add_argument("--ngram-top-n-bigrams", type=int, default=10, help="Number of top bigrams to suggest for themes (default: 10).")
+    parser.add_argument("--ngram-top-n-trigrams", type=int, default=10, help="Number of top trigrams to suggest for themes (default: 10).")
 
     args = parser.parse_args()
 
@@ -89,10 +93,13 @@ def main():
         logger.warning("--analyze-hashtags requires --output-csv to be specified. No hashtag analysis will be performed.")
         args.analyze_hashtags = False
 
-    if args.suggest_users and not args.output_csv: # New dependency check
+    if args.suggest_users and not args.output_csv:
         logger.warning("--suggest-users requires --output-csv to be specified. No user suggestions will be performed.")
         args.suggest_users = False
 
+    if args.suggest_themes and not args.output_csv: # New dependency check
+        logger.warning("--suggest-themes requires --output-csv to be specified. No theme suggestions will be performed.")
+        args.suggest_themes = False
 
     logger.info(f"Attempting to fetch up to {args.limit} media items for hashtag: #{args.hashtag} using user ID {user_id[:5]}... (token hidden)")
 
@@ -151,6 +158,38 @@ Successfully found {len(media_items)} media items for #{args.hashtag}:")
                     print("User suggestion analysis could not be completed based on the CSV.")
             elif args.suggest_users and not saved_csv_filepath:
                 logger.warning("CSV saving may have failed or was not requested. Skipping user suggestions.")
+
+            # N-gram Theme Suggestions
+            if args.suggest_themes and saved_csv_filepath:
+                print("
+--- Content Theme Suggestions (N-grams) ---")
+                ngram_results = extract_common_ngrams(
+                    saved_csv_filepath,
+                    top_n_bigrams=args.ngram_top_n_bigrams,
+                    top_n_trigrams=args.ngram_top_n_trigrams
+                )
+                if ngram_results:
+                    common_bigrams, common_trigrams = ngram_results
+
+                    print(f"Top {len(common_bigrams)} Common Bigrams (potential themes/phrases):")
+                    if common_bigrams:
+                        for bigram, count in common_bigrams:
+                            print(f"  '{' '.join(bigram)}': {count}")
+                    else:
+                        print("  No significant bigrams found.")
+
+                    print(f"
+Top {len(common_trigrams)} Common Trigrams (potential themes/phrases):")
+                    if common_trigrams:
+                        for trigram, count in common_trigrams:
+                            print(f"  '{' '.join(trigram)}': {count}")
+                    else:
+                        print("  No significant trigrams found.")
+                else:
+                    print("N-gram analysis for theme suggestions could not be completed. Check logs.")
+            elif args.suggest_themes and not saved_csv_filepath:
+                logger.warning("CSV saving may have failed or was not requested. Skipping theme suggestions.")
+
     else:
         print(f"
 No media items found for #{args.hashtag}, or an error occurred during fetching. Check logs for details.")

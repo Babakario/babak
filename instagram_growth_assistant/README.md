@@ -105,12 +105,30 @@ instagram_growth_assistant/
     ```
 
 6.  **Analysis Parameter Arguments (Optional):**
-    When using `--analyze-hashtags` or `--suggest-users` with `src/main.py`, you can also use:
-    *   `--hashtag-top-n <number>`: Sets the number of top hashtags to show (default: 10).
-    *   `--suggest-min-posts <number>`: Sets the minimum number of posts a user must have to be suggested (default: 2).
-    *   `--suggest-top-n <number>`: Sets the number of top users to suggest (default: 10).
+    When using analysis features like `--analyze-hashtags`, `--suggest-users`, or `--suggest-themes` with `src/main.py`, you can also use these optional arguments to customize the analysis:
+    *   `--hashtag-top-n <number>`: Sets the number of top hashtags to show (default: 10). Used with `--analyze-hashtags`.
+    *   `--suggest-min-posts <number>`: Sets the minimum number of posts a user must have to be suggested (default: 2). Used with `--suggest-users`.
+    *   `--suggest-top-n <number>`: Sets the number of top users to suggest (default: 10). Used with `--suggest-users`.
+    *   `--suggest-themes`: Boolean flag to enable content theme suggestions based on n-gram analysis of captions. Requires `--output-csv`.
+    *   `--ngram-top-n-bigrams <number>`: Specifies the number of top common bigrams to display for theme suggestions (default: 10). Used with `--suggest-themes`.
+    *   `--ngram-top-n-trigrams <number>`: Specifies the number of top common trigrams to display for theme suggestions (default: 10). Used with `--suggest-themes`.
 
-7.  **Standalone Analysis Scripts:**
+7.  **Fetching, Saving, and Suggesting Content Themes (N-grams):**
+    To analyze captions for common phrases (bigrams and trigrams) that might suggest content themes:
+    ```bash
+    python src/main.py foodblogger --limit 50 --output-csv --suggest-themes --ngram-top-n-bigrams 7 --ngram-top-n-trigrams 7
+    ```
+    *   `--suggest-themes`: Enables n-gram analysis on captions from the generated CSV.
+    *   `--ngram-top-n-bigrams 7`: Displays the top 7 most common two-word phrases.
+    *   `--ngram-top-n-trigrams 7`: Displays the top 7 most common three-word phrases.
+
+
+8.  **All Features Together (Example Overhaul):**
+    ```bash
+    python src/main.py recipeideas --limit 30 --output-csv --analyze-hashtags --hashtag-top-n 8 --suggest-users --suggest-min-posts 2 --suggest-top-n 5 --suggest-themes --ngram-top-n-bigrams 5 --ngram-top-n-trigrams 5
+    ```
+
+9.  **Standalone Analysis Scripts:**
     The analysis scripts can also be run independently if you already have a CSV data file:
     *   **Hashtag Analysis:**
         ```bash
@@ -119,6 +137,10 @@ instagram_growth_assistant/
     *   **User Suggestion:**
         ```bash
         python src/analysis/user_suggester.py data/your_hashtag_data.csv --min_posts 3 --top_n 10
+        ```
+    *   **Caption N-gram Analysis (Theme Suggestion):**
+        ```bash
+        python src/analysis/caption_analyzer.py data/your_hashtag_data.csv --top-n-bigrams 12 --top-n-trigrams 12
         ```
 
 ## Contributing
