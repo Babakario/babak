@@ -4,6 +4,7 @@ from app.services.ai_content_service import AIContentService
 # Initialize the service once for all tests in this module if needed, or per test
 @pytest.fixture
 def ai_service():
+    """Provides an instance of AIContentService."""
     return AIContentService()
 
 def test_generate_caption_placeholder(ai_service):
@@ -13,16 +14,49 @@ def test_generate_caption_placeholder(ai_service):
     assert prompt in caption # The placeholder includes the prompt
     assert "#AICaption" in caption # Placeholder includes this hashtag
 
-def test_generate_hashtags_placeholder(ai_service):
-    content = "Some sample content for testing hashtags"
-    hashtags = ai_service.generate_hashtags(content)
-    assert isinstance(hashtags, list)
-    if hashtags: # It might return an empty list if content is very short or unusual
-      for tag in hashtags:
-          assert tag.startswith("#")
-    # Check if default hashtags are returned for empty/problematic content
-    empty_hashtags = ai_service.generate_hashtags("")
-    assert "#GeneratedContent" in empty_hashtags
+# --- Tests for the new generate_hashtags implementation ---
+
+def test_generate_hashtags_normal(ai_service):
+    text = "This is a great post about software engineering and python programming."
+    hashtags = ai_service.generate_hashtags(text, num_hashtags=3)
+    assert len(hashtags) == 3
+    possible_tags = {"#great", "#post", "#software", "#engineering", "#python", "#programming"}
+    for tag in hashtags:
+        assert tag in possible_tags
+
+def test_generate_hashtags_empty_input(ai_service):
+    text = ""
+    hashtags = ai_service.generate_hashtags(text)
+    assert hashtags == []
+
+def test_generate_hashtags_no_relevant_words(ai_service):
+    text = "it is a and the or"
+    hashtags = ai_service.generate_hashtags(text)
+    # This now returns a default list based on the new implementation
+    assert hashtags == ["#GeneratedContent", "#AI"]
+
+def test_generate_hashtags_with_punctuation(ai_service):
+    text = "Let's talk about python! It's amazing."
+    hashtags = ai_service.generate_hashtags(text, num_hashtags=2)
+    assert len(hashtags) == 2
+    possible_tags = {"#lets", "#talk", "#python", "#amazing"}
+    for tag in hashtags:
+        assert tag in possible_tags
+
+def test_generate_hashtags_num_hashtags_param(ai_service):
+    text = "word1 word2 word3 word4 word5 word6"
+    hashtags = ai_service.generate_hashtags(text, num_hashtags=2)
+    assert len(hashtags) == 2
+    hashtags_4 = ai_service.generate_hashtags(text, num_hashtags=4)
+    assert len(hashtags_4) == 4
+
+def test_generate_hashtags_case_insensitivity(ai_service):
+    text = "Python is the same as python"
+    hashtags = ai_service.generate_hashtags(text, num_hashtags=1)
+    # With frequency count, 'python' appears twice and should be the top result
+    assert hashtags == ["#python"]
+
+# --- End of tests for generate_hashtags ---
 
 
 def test_generate_image_from_text_placeholder(ai_service):

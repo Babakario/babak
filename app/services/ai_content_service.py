@@ -1,6 +1,9 @@
 # Placeholder for AI Content Generation Service
 # This could integrate with APIs like OpenAI's GPT, DALL·E, Sora, or local models.
 
+import collections
+import string
+
 class AIContentService:
     def __init__(self, api_key=None):
         self.api_key = api_key
@@ -17,15 +20,49 @@ class AIContentService:
         return f"This is a generated caption for '{prompt}'. #AICaption #Generated"
 
     def generate_hashtags(self, text_content, num_hashtags=5):
-        # Placeholder for hashtag generation
-        print(f"Generating hashtags for content: '{text_content[:50]}...' (placeholder)")
-        words = text_content.lower().replace('.', '').replace(',', '').split()
-        common_words_to_exclude = {'the', 'a', 'is', 'this', 'for', 'and', 'to', 'in', 'it', 'of', 'with'}
-        potential_hashtags = [word for word in words if word not in common_words_to_exclude and len(word) > 3]
+        # A more robust implementation of hashtag generation.
+        print(f"Generating hashtags for content: '{text_content[:50]}...'")
 
-        generated_hashtags = [f"#{tag}" for tag in potential_hashtags[:num_hashtags]]
-        if not generated_hashtags and text_content:
-            generated_hashtags = ["#GeneratedContent", "#AI"]
+        if not text_content:
+            return []
+
+        # Comprehensive list of stop words
+        stop_words = {
+            'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at',
+            'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+            'can', "can't", 'cannot', 'could', "couldn't", 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down', 'during',
+            'each', 'few', 'for', 'from', 'further', 'had', "hadn't", 'has', "hasn't", 'have', "haven't", 'having', 'he', "he'd",
+            "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's", 'i', "i'd", "i'll",
+            "i'm", "i've", 'if', 'in', 'into', 'is', "isn't", 'it', "it's", 'its', 'itself', "let's", 'me', 'more', 'most',
+            "mustn't", 'my', 'myself', 'no', 'nor', 'not', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our',
+            'ours', 'ourselves', 'out', 'over', 'own', 'same', "shan't", 'she', "she'd", "she'll", "she's", 'should',
+            "shouldn't", 'so', 'some', 'such', 'than', 'that', "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then',
+            'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to',
+            'too', 'under', 'until', 'up', 'very', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were',
+            "weren't", 'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom',
+            'why', "why's", 'with', "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your',
+            'yours', 'yourself', 'yourselves'
+        }
+
+        # 1. Lowercase and remove punctuation
+        translator = str.maketrans('', '', string.punctuation)
+        clean_text = text_content.lower().translate(translator)
+
+        # 2. Split into words and filter out stop words and short words
+        words = [word for word in clean_text.split() if word not in stop_words and len(word) > 3]
+
+        # 3. Count word frequencies
+        if not words:
+            return ["#GeneratedContent", "#AI"]
+
+        word_counts = collections.Counter(words)
+
+        # 4. Get the most common words
+        most_common_words = word_counts.most_common(num_hashtags)
+
+        # 5. Format as hashtags
+        generated_hashtags = [f"#{word}" for word, count in most_common_words]
+
         return generated_hashtags
 
     def generate_image_from_text(self, prompt, image_size="1024x1024"):
