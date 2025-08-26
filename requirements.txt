@@ -1,9 +1,9 @@
 Flask
+requests==2.28.2
 
 # For AI Content Generation (choose one or more):
-# openai
+openai
 # transformers
-# requests # (if calling external APIs directly)
 
 # For Data Analysis (optional, if doing complex analysis):
 # pandas
