@@ -6,9 +6,9 @@ def create_app():
     # Placeholder for config
     app.config['SECRET_KEY'] = 'your_secret_key_should_be_changed' # Changed secret key
 
-    # Register blueprints if we decide to use them
-    # from .routes import main as main_blueprint
-    # app.register_blueprint(main_blueprint)
+    # Register blueprints
+    from .routes.calculator import calculator_bp
+    app.register_blueprint(calculator_bp)
 
     @app.route('/')
     def home(): # Renamed from hello to home for clarity

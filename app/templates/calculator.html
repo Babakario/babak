@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توربین بادی لیزری</title>
+    <style>
+        body {
+            background-color: #1e1e2e;
+            color: white;
+            font-family: "B Nazanin", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            border-radius: 10px;
+            background-color: #2a2a3e;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        h1 {
+            color: cyan;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 1.2em;
+            display: block;
+            margin-top: 15px;
+        }
+        input[type="text"] {
+            font-family: "B Nazanin", sans-serif;
+            font-size: 1em;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            background-color: #1e1e2e;
+            color: white;
+            width: 80%;
+            max-width: 250px;
+        }
+        button {
+            font-family: "B Nazanin", sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: cyan;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #00ffffb3;
+        }
+        .result {
+            color: yellow;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+        .error {
+            color: #ff4d4d;
+            font-size: 1.1em;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+        .home-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: cyan;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مدل توربین بادی لیزری</h1>
+        <form action="/calculator" method="post">
+            <label for="wind_speed">سرعت باد (m/s):</label>
+            <input type="text" id="wind_speed" name="wind_speed" value="{{ wind_speed or '' }}" required>
+
+            <label for="laser_power">توان لیزر (kW):</label>
+            <input type="text" id="laser_power" name="laser_power" value="{{ laser_power or '' }}" required>
+
+            <button type="submit">محاسبه توان خروجی</button>
+        </form>
+
+        {% if result %}
+            <div class="result">توان خروجی: {{ result }}</div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <a href="/" class="home-link">بازگشت به صفحه اصلی</a>
+    </div>
+</body>
+</html>
