@@ -24,7 +24,7 @@ class AIContentService:
         potential_hashtags = [word for word in words if word not in common_words_to_exclude and len(word) > 3]
 
         generated_hashtags = [f"#{tag}" for tag in potential_hashtags[:num_hashtags]]
-        if not generated_hashtags and text_content:
+        if not generated_hashtags:
             generated_hashtags = ["#GeneratedContent", "#AI"]
         return generated_hashtags
 
